@@ -1,0 +1,20 @@
+{
+"Expedicion": {
+    "Id":0,
+    "Buque":"MA",
+    "Anio":2023,
+    "Numero":21
+},
+"Instrumento": {
+    "Id":0,
+    "Siglas":""
+},
+"Archivos": {
+    "Carpeta": "C:\\",
+    "Configuracion": [
+    "*.xmlcon",
+    "*.xml"
+    ]
+},
+"Estaciones":{}
+}

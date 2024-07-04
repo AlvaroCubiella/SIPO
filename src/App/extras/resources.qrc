@@ -1,0 +1,21 @@
+<RCC>
+  <qresource prefix="/">
+    <file>icons/green-led-on.png</file>
+    <file>icons/led-red-on.png</file>
+    <file>icons/blue-led-on.png</file>
+    <file>icons/online.png</file>
+  </qresource>
+  <qresource prefix="/toolbar">
+    <file>icons/add.ico</file>
+    <file>icons/application.ico</file>
+    <file>icons/apply.ico</file>
+    <file>icons/blue-led-on.png</file>
+    <file>icons/close.ico</file>
+    <file>icons/create.ico</file>
+    <file>icons/database.ico</file>
+    <file>icons/delete.ico</file>
+    <file>icons/erase.ico</file>
+    <file>icons/exit.ico</file>
+    <file>icons/folder.ico</file>
+  </qresource>
+</RCC>

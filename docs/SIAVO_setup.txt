@@ -1,0 +1,99 @@
+# Intrucciones de sintaxis para SIAVO_setup
+
+#### Desarrollado por Cubiella, Alvaro
+
+SIAVO_Cfg.exe es un archivo de comandos CLI (Command Line Interface), el cual es un programa que se utiliza para ejecutar comandos desde la terminal.Permite la interacción con la 
+aplicación a través de la interfaz de línea de comandos, lo que puede ser útil para automatizar tareas, 
+realizar configuraciones, o ejecutar funciones específicas de la aplicación.
+
+La finalidad de esta herramienta es definir, por medio de linea de comandos, instrucciones básicas para poder gestionar los directorios de trabajo de la estructura de SIAVO y administrar las variables propias de entorno.
+
+### Lista de comandos
+
+	-h, --help		Muestra el menu de comandos y ayuda
+	--ayuda
+	--version		Muestra la versión del programa
+	--execute, -e	Confirma la ejecucion de lineas de comando [mkroot; mkcamp]
+	--CreateFile	Crea un archivo de variables de entorno por defecto.
+	--edit			Edito los valores de entorno. Espera dos argumentos. Primero el nombre de la variable; segun
+					el valor a asignar. Los directorios deben quedar asignados con doble 'backslash' [ \ ]. Las
+					variables son sensitive case.
+	--Delete		Borra el archivo .env. Luego debera crear uno nuevo
+	--print, -p		Muestra en pantalla los valores de variables de entorno.
+	--file, -f 		Indica el archivo de variables de entorno a cargar. Por defecto es .env
+	--json, -j 		Crea un archivo JSON para importaciones nuevo.
+	--mkroot, -r	Crear la estructura de carpetas para campañas oceanograficas.
+	--mkcamp, -c 	Crea la estructura de carpetas para la campaña a partir del archivo de sincronzacion JSON.
+
+### Comandos bash:
+
+##### Obtener en la consola la lista de comandos anteriormente listada.
+
+- SIAVO_Cfg.exe -h 
+- SIAVO_Cfg.exe -ayuda
+
+##### Version del CLI
+
+	SIAVO_Cfg.exe --version
+
+
+- Crear posteo
+- Administrar usuarios (permisos y grupos de trabajo)
+
+El usuario registrado tiene acceso a:
+- Ver los informes de la pagina
+- Realizar busquedas de articulos viejos
+- Publicar nuevos informes
+- Editar/eliminar informes antiguos (segun permisos asignados por el Administrador)
+
+El usuario final tiene acceso a:
+- Ver los informes de la pagina
+- Realizar busquedas de articulos viejos
+- Registrarse
+
+## Instalaciones desde Visual Studio Code
+
+- Instalar Python
+
+```bash
+$ pip install python
+```
+- Instalar Django
+```bash
+$ pip install django
+```
+- Instalar Pilow
+```bash
+$ pip install pillow 
+```
+- Instalar ckeditor
+```bash
+$ pip install django-ckeditor
+```
+## Comprobando que todo funcione de manera correcta y que las versiones sean las correspondientes.
+
+- Python en el PowerShell
+```bash
+$ python --version
+Python 3.9.7
+```
+- Django en el shell
+```ps
+>>> import django
+>>> django.VERSION
+(4, 1, 2, 'final', 0)
+>>>
+```
+
+#### Lo primero que debemos hacer es crear nuestro repositorio en github  https://github.com/AlvaroCubiella/Proyecto-Final-Django.git.
+
+#### Luego en VScode vamos a crear una carpeta y vamos a abrirla desde la terminal para clonar nuestro repositorio:
+
+```ps
+git clone https://github.com/AlvaroCubiella/Proyecto-Final-Django.git .
+```
+```ps
+"Tener en cuenta el espacio y el .(punto) ya que asi no se creara una nueva carpeta dentro de nuestro repositorio."
+```
+
+```

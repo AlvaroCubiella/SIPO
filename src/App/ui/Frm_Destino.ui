@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Frm_Destino</class>
+ <widget class="QWidget" name="Frm_Destino">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>374</width>
+    <height>125</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>374</width>
+    <height>125</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>374</width>
+    <height>125</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Destino...</string>
+  </property>
+  <widget class="QGroupBox" name="groupBox">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>351</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>11</pointsize>
+    </font>
+   </property>
+   <property name="title">
+    <string>Seleccione la unidad donde se instalara:</string>
+   </property>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>161</width>
+      <height>29</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Unidad:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="comboBox">
+       <property name="font">
+        <font>
+         <pointsize>11</pointsize>
+        </font>
+       </property>
+       <item>
+        <property name="text">
+         <string>C:\</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>D:\</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>E:\</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>F:\</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>G:\</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>H:\</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>I:\</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>J:\</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>K:\</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>L:\</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>M:\</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>N:\</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>O:\</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDialogButtonBox" name="buttonBox">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>90</y>
+     <width>193</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="standardButtons">
+    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
