@@ -32,8 +32,8 @@ class Ui_Frm_Config(object):
         self.lbl_Titulo.setFont(font)
         self.lbl_Titulo.setAutoFillBackground(False)
         self.lbl_Titulo.setStyleSheet("background-color: rgb(0, 120, 215);\n"
-"color: #fff\n"
-"")
+                                      "color: #fff\n"
+                                      "")
         self.lbl_Titulo.setTextFormat(QtCore.Qt.RichText)
         self.lbl_Titulo.setAlignment(QtCore.Qt.AlignCenter)
         self.lbl_Titulo.setObjectName("lbl_Titulo")
@@ -52,8 +52,8 @@ class Ui_Frm_Config(object):
         self.lbl_Titulo_2.setFont(font)
         self.lbl_Titulo_2.setAutoFillBackground(False)
         self.lbl_Titulo_2.setStyleSheet("background-color: rgb(0, 120, 215);\n"
-"color: #fff\n"
-"")
+                                        "color: #fff\n"
+                                        "")
         self.lbl_Titulo_2.setTextFormat(QtCore.Qt.RichText)
         self.lbl_Titulo_2.setAlignment(QtCore.Qt.AlignCenter)
         self.lbl_Titulo_2.setObjectName("lbl_Titulo_2")
@@ -158,13 +158,13 @@ class Ui_Frm_Config(object):
         self.lbl_Titulo_3.setFont(font)
         self.lbl_Titulo_3.setAutoFillBackground(False)
         self.lbl_Titulo_3.setStyleSheet("background-color: rgb(0, 120, 215);\n"
-"color: #fff\n"
-"")
+                                        "color: #fff\n"
+                                        "")
         self.lbl_Titulo_3.setTextFormat(QtCore.Qt.RichText)
         self.lbl_Titulo_3.setAlignment(QtCore.Qt.AlignCenter)
         self.lbl_Titulo_3.setObjectName("lbl_Titulo_3")
         self.layoutWidget2 = QtWidgets.QWidget(self.tab_2)
-        self.layoutWidget2.setGeometry(QtCore.QRect(10, 35, 232, 88))
+        self.layoutWidget2.setGeometry(QtCore.QRect(10, 35, 232, 97))
         self.layoutWidget2.setObjectName("layoutWidget2")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.layoutWidget2)
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
@@ -226,8 +226,8 @@ class Ui_Frm_Config(object):
         self.lbl_Titulo_4.setFont(font)
         self.lbl_Titulo_4.setAutoFillBackground(False)
         self.lbl_Titulo_4.setStyleSheet("background-color: rgb(0, 120, 215);\n"
-"color: #fff\n"
-"")
+                                        "color: #fff\n"
+                                        "")
         self.lbl_Titulo_4.setTextFormat(QtCore.Qt.RichText)
         self.lbl_Titulo_4.setAlignment(QtCore.Qt.AlignCenter)
         self.lbl_Titulo_4.setObjectName("lbl_Titulo_4")
@@ -259,7 +259,8 @@ class Ui_Frm_Config(object):
         self.cbox_GPS_COM = QtWidgets.QComboBox(self.layoutWidget3)
         self.cbox_GPS_COM.setEnabled(False)
         self.cbox_GPS_COM.setCurrentText("")
-        self.cbox_GPS_COM.setInsertPolicy(QtWidgets.QComboBox.InsertAlphabetically)
+        self.cbox_GPS_COM.setInsertPolicy(
+            QtWidgets.QComboBox.InsertAlphabetically)
         self.cbox_GPS_COM.setObjectName("cbox_GPS_COM")
         self.horizontalLayout_9.addWidget(self.cbox_GPS_COM)
         self.horizontalLayout_11.addLayout(self.horizontalLayout_9)
@@ -437,8 +438,8 @@ class Ui_Frm_Config(object):
         self.lbl_Titulo_5.setFont(font)
         self.lbl_Titulo_5.setAutoFillBackground(False)
         self.lbl_Titulo_5.setStyleSheet("background-color: rgb(0, 120, 215);\n"
-"color: #fff\n"
-"")
+                                        "color: #fff\n"
+                                        "")
         self.lbl_Titulo_5.setTextFormat(QtCore.Qt.RichText)
         self.lbl_Titulo_5.setAlignment(QtCore.Qt.AlignCenter)
         self.lbl_Titulo_5.setObjectName("lbl_Titulo_5")
@@ -459,7 +460,8 @@ class Ui_Frm_Config(object):
         self.spinBox_CTD.setAcceptDrops(True)
         self.spinBox_CTD.setInputMethodHints(QtCore.Qt.ImhNone)
         self.spinBox_CTD.setReadOnly(False)
-        self.spinBox_CTD.setButtonSymbols(QtWidgets.QAbstractSpinBox.UpDownArrows)
+        self.spinBox_CTD.setButtonSymbols(
+            QtWidgets.QAbstractSpinBox.UpDownArrows)
         self.spinBox_CTD.setMinimum(1)
         self.spinBox_CTD.setMaximum(15)
         self.spinBox_CTD.setObjectName("spinBox_CTD")
@@ -548,52 +550,6 @@ class Ui_Frm_Config(object):
         self.label_12.setObjectName("label_12")
         self.horizontalLayout_24.addWidget(self.groupBox_9)
         self.tabWidget.addTab(self.tab_4, "")
-        self.tab_5 = QtWidgets.QWidget()
-        self.tab_5.setObjectName("tab_5")
-        self.lbl_Titulo_6 = QtWidgets.QLabel(self.tab_5)
-        self.lbl_Titulo_6.setGeometry(QtCore.QRect(0, 0, 406, 26))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        font.setBold(True)
-        font.setWeight(75)
-        self.lbl_Titulo_6.setFont(font)
-        self.lbl_Titulo_6.setAutoFillBackground(False)
-        self.lbl_Titulo_6.setStyleSheet("background-color: rgb(0, 120, 215);\n"
-"color: #fff\n"
-"")
-        self.lbl_Titulo_6.setTextFormat(QtCore.Qt.RichText)
-        self.lbl_Titulo_6.setAlignment(QtCore.Qt.AlignCenter)
-        self.lbl_Titulo_6.setObjectName("lbl_Titulo_6")
-        self.groupBox_10 = QtWidgets.QGroupBox(self.tab_5)
-        self.groupBox_10.setGeometry(QtCore.QRect(5, 25, 396, 81))
-        self.groupBox_10.setObjectName("groupBox_10")
-        self.layoutWidget5 = QtWidgets.QWidget(self.groupBox_10)
-        self.layoutWidget5.setGeometry(QtCore.QRect(15, 20, 226, 57))
-        self.layoutWidget5.setObjectName("layoutWidget5")
-        self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.layoutWidget5)
-        self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
-        self.verticalLayout_3.setObjectName("verticalLayout_3")
-        self.horizontalLayout_25 = QtWidgets.QHBoxLayout()
-        self.horizontalLayout_25.setSpacing(55)
-        self.horizontalLayout_25.setObjectName("horizontalLayout_25")
-        self.label_13 = QtWidgets.QLabel(self.layoutWidget5)
-        self.label_13.setObjectName("label_13")
-        self.horizontalLayout_25.addWidget(self.label_13)
-        self.txt_Ventana_Ancho = QtWidgets.QLineEdit(self.layoutWidget5)
-        self.txt_Ventana_Ancho.setObjectName("txt_Ventana_Ancho")
-        self.horizontalLayout_25.addWidget(self.txt_Ventana_Ancho)
-        self.verticalLayout_3.addLayout(self.horizontalLayout_25)
-        self.horizontalLayout_26 = QtWidgets.QHBoxLayout()
-        self.horizontalLayout_26.setSpacing(65)
-        self.horizontalLayout_26.setObjectName("horizontalLayout_26")
-        self.label_14 = QtWidgets.QLabel(self.layoutWidget5)
-        self.label_14.setObjectName("label_14")
-        self.horizontalLayout_26.addWidget(self.label_14)
-        self.txt_Ventana_Alto = QtWidgets.QLineEdit(self.layoutWidget5)
-        self.txt_Ventana_Alto.setObjectName("txt_Ventana_Alto")
-        self.horizontalLayout_26.addWidget(self.txt_Ventana_Alto)
-        self.verticalLayout_3.addLayout(self.horizontalLayout_26)
-        self.tabWidget.addTab(self.tab_5, "")
 
         self.retranslateUi(Frm_Config)
         self.tabWidget.setCurrentIndex(0)
@@ -605,7 +561,8 @@ class Ui_Frm_Config(object):
         self.btn_Salir.setText(_translate("Frm_Config", "Salir"))
         self.btn_Guardar.setText(_translate("Frm_Config", "Guardar"))
         self.lbl_Titulo.setText(_translate("Frm_Config", "Configuración"))
-        self.lbl_Titulo_2.setText(_translate("Frm_Config", "Directorios de Trabajo"))
+        self.lbl_Titulo_2.setText(_translate(
+            "Frm_Config", "Directorios de Trabajo"))
         self.groupBox.setTitle(_translate("Frm_Config", "Estructura"))
         self.label.setText(_translate("Frm_Config", "Directorio:"))
         self.txt_DirEstructura.setText(_translate("Frm_Config", "C:\\"))
@@ -618,18 +575,21 @@ class Ui_Frm_Config(object):
         self.label_5.setText(_translate("Frm_Config", "Directorio:"))
         self.txt_DirSeaSaveini.setText(_translate("Frm_Config", "C:\\"))
         self.dirpick_SeaSaveini.setText(_translate("Frm_Config", "..."))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("Frm_Config", "Directorios"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(
+            self.tab), _translate("Frm_Config", "Directorios"))
         self.lbl_Titulo_3.setText(_translate("Frm_Config", "Datos de Campaña"))
         self.label_8.setText(_translate("Frm_Config", "Siglas Buque:"))
         self.label_9.setText(_translate("Frm_Config", "Año:"))
         self.label_10.setText(_translate("Frm_Config", "Nro. Campaña:"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("Frm_Config", "Campaña"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(
+            self.tab_2), _translate("Frm_Config", "Campaña"))
         self.lbl_Titulo_4.setText(_translate("Frm_Config", "Puertos Series"))
         self.groupBox_4.setTitle(_translate("Frm_Config", "GPS"))
         self.groupBox_5.setTitle(_translate("Frm_Config", "CTD"))
         self.groupBox_6.setTitle(_translate("Frm_Config", "TSG"))
         self.groupBox_7.setTitle(_translate("Frm_Config", "Batimetria"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate("Frm_Config", "Puertos"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(
+            self.tab_3), _translate("Frm_Config", "Puertos"))
         self.lbl_Titulo_5.setText(_translate("Frm_Config", "Datos de Entrada"))
         self.groupBox_8.setTitle(_translate("Frm_Config", "CTD"))
         self.label_11.setText(_translate("Frm_Config", "Variables:"))
@@ -641,13 +601,8 @@ class Ui_Frm_Config(object):
         item = self.tabla_TSG.horizontalHeaderItem(0)
         item.setText(_translate("Frm_Config", "Variable"))
         self.label_12.setText(_translate("Frm_Config", "Variables:"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), _translate("Frm_Config", "Datos Instrumento"))
-        self.lbl_Titulo_6.setText(_translate("Frm_Config", "Configuración Ventana"))
-        self.groupBox_10.setTitle(_translate("Frm_Config", "Tamaño del menu"))
-        self.label_13.setText(_translate("Frm_Config", "Ancho:"))
-        self.label_14.setText(_translate("Frm_Config", "Alto:"))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_5), _translate("Frm_Config", "Ventana"))
-#import resources_rc
+        self.tabWidget.setTabText(self.tabWidget.indexOf(
+            self.tab_4), _translate("Frm_Config", "Datos Instrumento"))
 
 
 if __name__ == "__main__":

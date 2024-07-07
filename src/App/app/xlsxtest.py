@@ -2,8 +2,9 @@ from openpyxl import Workbook
 from openpyxl.styles import Border, Side, Alignment, Font
 from PyPDF2 import PdfFileWriter, PdfFileReader
 from utils import xlsxStructura
-from tempfile import NamedTemporaryFile 
+from tempfile import NamedTemporaryFile
 import os
+
 
 def create_excel_with_merged_cells():
     # Crear un nuevo libro de trabajo
@@ -11,7 +12,7 @@ def create_excel_with_merged_cells():
     # Seleccionar la hoja activa
     ws = wb.active
 
-     # Configurar la orientación horizontal (horizontal = True) o vertical (horizontal = False)
+    # Configurar la orientación horizontal (horizontal = True) o vertical (horizontal = False)
     ws.page_setup.orientation = ws.ORIENTATION_LANDSCAPE  # Orientación horizontal
 
     # Configurar los márgenes de la hoja en milímetros
@@ -22,9 +23,9 @@ def create_excel_with_merged_cells():
 
     range_ascii = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
                    'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
-                   'Y', 'Z', 'AA', 'AB', 'AC', 'AD', 'AE', 'AF', 'AG', 'AH', 
+                   'Y', 'Z', 'AA', 'AB', 'AC', 'AD', 'AE', 'AF', 'AG', 'AH',
                    'AI', 'AJ']
-    
+
     for i in range_ascii:
         ws.column_dimensions[i].width = 3.67
 
@@ -38,14 +39,14 @@ def create_excel_with_merged_cells():
 
     celdas = xlsxStructura()
 
-
     border = Border(left=Side(style='thin', color='000000'),
-                        right=Side(style='thin', color='000000'),
-                        top=Side(style='thin', color='000000'),
-                        bottom=Side(style='thin', color='000000')) 
-    
+                    right=Side(style='thin', color='000000'),
+                    top=Side(style='thin', color='000000'),
+                    bottom=Side(style='thin', color='000000'))
+
     # Definir la alineación para ajustar el texto
-    alignment = Alignment(wrap_text=True, horizontal='center', vertical='center')
+    alignment = Alignment(
+        wrap_text=True, horizontal='center', vertical='center')
     # Definir el estilo de la fuente
     font = Font(name='Arial', size=12, bold=True)
 
@@ -62,7 +63,7 @@ def create_excel_with_merged_cells():
         # Combino celda del nombre
         ws.merge_cells(f"{ini_col}{ini_fila}:{fin_col}{ini_fila}")
         ws[ini] = value['lbl']
-        
+
         # Aplicar el borde al rango de celdas combinadas
         for row in ws[f"{ini_col}{ini_fila}:{fin_col}{ini_fila}"]:
             for cell in row:
@@ -70,19 +71,17 @@ def create_excel_with_merged_cells():
                 cell.font = font
                 cell.alignment = alignment
         if 'campo' in celdas[key]:
-            if celdas[key]['campo']==True:
+            if celdas[key]['campo'] == True:
                 # Genero un campo para completar
                 ws.merge_cells(f"{ini_col}{ini_fila+1}:{fin_col}{ini_fila+1}")
                 for row in ws[f"{ini_col}{ini_fila+1}:{fin_col}{ini_fila+1}"]:
                     for cell in row:
                         cell.border = border
         else:
-            print(key)
-
+            pass
 
     pdf_file = "hoja_de_calculo_con_combinacion.pdf"
     temp_dir = os.getcwd()
-
 
     # Guardar el archivo Excel temporalmente como PDF
     with NamedTemporaryFile(suffix='.pdf', dir=temp_dir, delete=False) as tmp_excel_pdf:
@@ -90,7 +89,7 @@ def create_excel_with_merged_cells():
 
     wb.save(tmp_excel_pdf.name)
 
-     # Copiar el contenido del archivo PDF temporal a un nuevo archivo PDF
+    # Copiar el contenido del archivo PDF temporal a un nuevo archivo PDF
     pdf_writer = PdfFileWriter()
     pdf_reader = PdfFileReader(tmp_excel_pdf.name)
     for page in range(pdf_reader.numPages):
@@ -102,6 +101,7 @@ def create_excel_with_merged_cells():
 
     # Guardar el archivo Excel
     wb.save("hoja_de_calculo_con_combinacion.xlsx")
+
 
 if __name__ == "__main__":
     create_excel_with_merged_cells()

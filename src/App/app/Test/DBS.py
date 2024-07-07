@@ -8,7 +8,7 @@
 # Copyright:   (c) Morochos 2019
 # Licence:     <your licence>
 # -------------------------------------------------------------------------------
-from app.NMEA import NMEA
+from NMEA import NMEA
 import datetime
 
 

@@ -64,12 +64,12 @@
     <property name="title">
      <string>Datos de estación</string>
     </property>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>5</x>
        <y>20</y>
-       <width>186</width>
+       <width>190</width>
        <height>53</height>
       </rect>
      </property>
@@ -104,55 +104,6 @@
         </item>
         <item>
          <widget class="QLineEdit" name="txt_EstGral">
-          <property name="minimumSize">
-           <size>
-            <width>85</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>85</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="QLabel" name="lbl_fTSG">
-          <property name="minimumSize">
-           <size>
-            <width>94</width>
-            <height>18</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>94</width>
-            <height>18</height>
-           </size>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>9</pointsize>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Archivo TSG:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="txt_fTSG">
           <property name="minimumSize">
            <size>
             <width>85</width>
@@ -392,7 +343,6 @@
  </widget>
  <tabstops>
   <tabstop>txt_EstGral</tabstop>
-  <tabstop>txt_fTSG</tabstop>
   <tabstop>btn_Inicio</tabstop>
   <tabstop>btn_Cubierta</tabstop>
   <tabstop>btn_Superficie</tabstop>

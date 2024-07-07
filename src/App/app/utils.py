@@ -1,73 +1,77 @@
 import os
+import xml.etree.ElementTree as ET
+
 
 def cfg():
     modelo = {
-            "Archivos": [
-        
-            ],
-            "Campania":{
-                "Siglasbuque": "VA",
-                "Anio":2021,
-                "Nrocampania":4
+        "Archivos": [
+
+        ],
+        "Campania": {
+            "Siglasbuque": "VA",
+            "Anio": 2021,
+            "Nrocampania": 4
+        },
+        "Directorios": {
+            "Datos": {
+                "Estructura": "C:\\SiavoVB_Anexo\\Estructura",
+                "seasave7": "C:\\SiavoVB_Anexo\\ConfRutinas",
+                "seasaveini": "C:\\SiavoVB_Anexo\\ConfInstrumentos"
             },
-            "Directorios":{
-                "Datos": {
-                    "Estructura":"C:\\SiavoVB_Anexo\\Estructura",
-                    "seasave7": "C:\\SiavoVB_Anexo\\ConfRutinas",
-                    "seasaveini": "C:\\SiavoVB_Anexo\\ConfInstrumentos"
-                },
-                "Adquisicion":{
-                    "sea_save_ini": "C:\\Users\\Alvaro\\AppData\\Local\\Sea-Bird\\IniFiles\\seasave.ini",
-                    "sea_savev7": "C:\\Program Files (x86)\\Sea-Bird\\SeasaveV7\\Seasave.exe",
-                    "sbedataproc": "C:\\Program Files (x86)\\Sea-Bird\\SBEDataProcessing-Win32\\SBEDataProc.exe"
-                }
+            "Adquisicion": {
+                "sea_save_ini": "C:\\Users\\Alvaro\\AppData\\Local\\Sea-Bird\\IniFiles\\seasave.ini",
+                "sea_savev7": "C:\\Program Files (x86)\\Sea-Bird\\SeasaveV7\\Seasave.exe",
+                "sbedataproc": "C:\\Program Files (x86)\\Sea-Bird\\SBEDataProcessing-Win32\\SBEDataProc.exe"
+            }
+        },
+        "Configuracion": {
+            "CTD": {
+                "Variables": 6,
+                "Status": 2,
+                "Intervalo": 5,
+                "Port": "COM14",
+                "BR": 9600,
+                "databits": 8,
+                "Parity": "None",
+                "Stopbits": 1,
+                "filas": ["Scan", "Pres", "Temp", "Cond", "Sal", "Bot"]
             },
-            "Configuracion":{
-                "CTD":{
-                    "Variables":6,
-                    "Status":2,
-                    "Intervalo":5,
-                    "Port":"COM14",
-                    "BR":9600,
-                    "databits":8,
-                    "Parity":"None",
-                    "Stopbits":1,
-                    "filas":["Scan","Pres","Temp","Cond","Sal","Bot"]
-                },
-                "TSG":{
-                    "Variables":15,
-                    "Status":2,
-                    "Intervalo":5,
-                    "Port":"COM15",
-                    "BR":9600,
-                    "databits":8,
-                    "Parity":"Even",
-                    "Stopbits":1,
-                    "filas":["ScanCount", "JulianDays", "Longitude", "Latitude", "Temperature", "Conductivity", "Salinity", "Density", "TemperatureSBE38", "SoundVelocity", "OxygenSaturation", "Time", "Elapsed", "Time", "NMEA"]
-                },
-                "NMEA":{
-                    "Status":2,
-                    "Intervalo":3,
-                    "Port":"COM11",
-                    "BR":4800,
-                    "databits":8,
-                    "Stopbits":1
-                },
-                "Batimetria":{
-                    "Status":2,
-                    "Intervalo":3,
-                    "Port":"COM6",
-                    "BR":9600,
-                    "databits":8,
-                    "Stopbits":1
-                }
-            } 
+            "TSG": {
+                "Variables": 15,
+                "Status": 2,
+                "Intervalo": 5,
+                "Port": "COM15",
+                "BR": 9600,
+                "databits": 8,
+                "Parity": "Even",
+                "Stopbits": 1,
+                "filas": ["ScanCount", "JulianDays", "Longitude", "Latitude", "Temperature", "Conductivity", "Salinity", "Density", "TemperatureSBE38", "SoundVelocity", "OxygenSaturation", "Time", "Elapsed", "Time", "NMEA"]
+            },
+            "NMEA": {
+                "Status": 2,
+                "Intervalo": 3,
+                "Port": "COM11",
+                "BR": 4800,
+                "databits": 8,
+                "Stopbits": 1
+            },
+            "Batimetria": {
+                "Status": 2,
+                "Intervalo": 3,
+                "Port": "COM6",
+                "BR": 9600,
+                "databits": 8,
+                "Stopbits": 1
+            }
         }
-    
+    }
+
     return modelo
 
 # Compruebo los archivo json compatibles para importar campanias
-def validate_import_json(dic, modelo = None):
+
+
+def validate_import_json(dic, modelo=None):
     """
     Comprueba si el archivo json tienen la misma estructura que uno para importar.
     """
@@ -75,29 +79,30 @@ def validate_import_json(dic, modelo = None):
     if modelo == None:
         modelo = {
             "Expedicion": {
-                "Id":0,
-                "Buque":"MA",
-                "Anio":2020,
-                "Numero":17
+                "Id": 0,
+                "Buque": "MA",
+                "Anio": 2020,
+                "Numero": 17
             },
             "Instrumento": {
-                "Id":0,
-                "Siglas":"SBE25_01"
+                "Id": 0,
+                "Siglas": "SBE25_01"
             },
             "Archivos": {
                 "Configuracion": [
-                "*.xmlcon",
-                "*.xml"
+                    "*.xmlcon",
+                    "*.xml"
                 ]
             },
-            "Estaciones":{}
+            "Estaciones": {}
         }
-        
+
     if type(modelo) is not type(dic):
         return False
 
     if isinstance(modelo, dict):
-        if set(modelo.keys()) != set(dic.keys()):                   # Comparo las etiquetas de cada dicionaio
+        # Comparo las etiquetas de cada dicionaio
+        if set(modelo.keys()) != set(dic.keys()):
             return False
 
         for clave in modelo.keys():
@@ -112,323 +117,158 @@ def validate_import_json(dic, modelo = None):
 # Estructura de carpetas a incluir dentro de una campaña nueva
 exp_path = {
     "virgenes": "Virgenes",
-    "cnv":"CNV",    
+    "cnv": "CNV",
     "termosal": {
-        "hex":"HEX",
-        "cnv":"CNV"    
+        "hex": "HEX",
+        "cnv": "CNV"
     },
-    "varios":"Varios",
+    "varios": "Varios",
 }
+
 
 def Estacion():
     estacion = {
-                'NroEstacion': '',
-                'Posicion':{
-                    'Inicio':{
-                        'Latitud':'',
-                        'Longitud':''
-                    },
-                    'Fin':{
-                        'Latitud':'',
-                        'Longitud':''
-                    }
-                },
-                'FechaHora':{
-                    'Inicio':{
-                        'FechaGMT':'',
-                        'HoraGMT':''
-                    },
-                    'Fin':{
-                        'FechaGMT':'',
-                        'HoraGMT':''
-                    }
-                },
-                'Batimetria':{
-                    'Inicio':0,
-                    'Fin':0
-                },
-                'Meteorologia':{},
-                'TSG_file':'',
-                'Skipover':0,
-                'Cubierta':{},
-                'Superficie': {},
-                'Fondo': {},
-                'Botellas': {},
-                'Comentarios':''            
+        'NroEstacion': '',
+        'Instrumento': {
+            'Sensores': {
+                'Primarios': {},
+                'Secundarios': {},
+                'Auxiliares': {},
             }
+        },
+        'Posicion': {
+            'Inicio': {
+                'Latitud': '',
+                'Longitud': ''
+            },
+            'Fin': {
+                'Latitud': '',
+                'Longitud': ''
+            }
+        },
+        'FechaHora': {
+            'Inicio': {
+                'FechaGMT': '',
+                'HoraGMT': ''
+            },
+            'Fin': {
+                'FechaGMT': '',
+                'HoraGMT': ''
+            }
+        },
+        'Batimetria': {
+            'Inicio': 0,
+            'Fin': 0
+        },
+        'Meteorologia': {},
+        'Skipover': 0,
+        'Cubierta': {},
+        'Superficie': {},
+        'Fondo': {},
+        'Comentarios': ''
+    }
     return estacion
 
-def xlsxStructura():
-    celdas = {
-        'Camp': {
-            'Range': {
-                'Col': {
-                    'Ini': 'A',
-                    'Fin': 'E'
-                },
-                'Fila': 1,
-            },
-            'lbl': 'Campaña',
-            'campo': True
-        },
-        'Estacion': {
-            'Range': {
-                'Col': {
-                    'Ini': 'F',
-                    'Fin': 'I'
-                },
-                'Fila': 1,
-            },
-            'lbl':'Estacion Gral.',
-            'campo': True
-        },
-        'FechaIni': {
-            'Range': {
-                'Col': {
-                    'Ini': 'J',
-                    'Fin': 'N'
-                },
-                'Fila': 1,
-            },
-            'lbl':'Fecha Inicio (GMT)',
-            'campo': True
-        },
-        'HoraIni': {
-            'Range': {
-                'Col': {
-                    'Ini': 'O',
-                    'Fin': 'S'
-                },
-                'Fila': 1,
-            },
-            'lbl':'Hora Inicio (GMT)',
-            'campo': True
-        },
-        'FechaFin': {
-            'Range': {
-                'Col': {
-                    'Ini': 'T',
-                    'Fin': 'X'
-                },
-                'Fila': 1,
-            },
-            'lbl':'Fecha Fin (GMT)',
-            'campo': True
-        },
-        'HoraFin': {
-            'Range': {
-                'Col': {
-                    'Ini': 'Y',
-                    'Fin': 'AC'
-                },
-                'Fila': 1,
-            },
-            'lbl':'Hora Fin (GMT)',
-            'campo': True
-        },
-        'Operador': {
-            'Range': {
-                'Col': {
-                    'Ini': 'AD',
-                    'Fin': 'AG'
-                },
-                'Fila': 1,
-            },
-            'lbl':'Operador',
-            'campo': True
-        },
-        'Hoja': {
-            'Range': {
-                'Col': {
-                    'Ini': 'AH',
-                    'Fin': 'AJ'
-                },
-                'Fila': 1,
-            },
-            'lbl':'Hoja Nº',
-            'campo': True
-        },
-        'Pos_Ini': {
-            'Range': {
-                'Col': {
-                    'Ini': 'A',
-                    'Fin': 'H'
-                },
-                'Fila': 4,
-            },
-            'lbl': 'Posicion Inicial',
-        },
-        'Lat_ini': {
-            'Range': {
-                'Col': {
-                    'Ini': 'A',
-                    'Fin': 'D'
-                },
-                'Fila': 5,
-            },
-            'lbl': 'Latitud',
-            'campo': True
-        },
-        'Lon_ini': {
-            'Range': {
-                'Col': {
-                    'Ini': 'E',
-                    'Fin': 'H'
-                },
-                'Fila': 5,
-            },
-            'lbl': 'Longitud',
-            'campo': True
-        },
-        'Pos_Fin': {
-            'Range': {
-                'Col': {
-                    'Ini': 'I',
-                    'Fin': 'P'
-                },
-                'Fila': 4,
-            },
-            'lbl': 'Posicion Final',
-        },
-        'Lat_fin': {
-            'Range': {
-                'Col': {
-                    'Ini': 'I',
-                    'Fin': 'L'
-                },
-                'Fila': 5,
-            },
-            'lbl': 'Latitud',
-            'campo': True
-        },
-        'Lon_fin': {
-            'Range': {
-                'Col': {
-                    'Ini': 'M',
-                    'Fin': 'P'
-                },
-                'Fila': 5,
-            },
-            'lbl': 'Posicion Final',
-            'campo': True
-        },
-        'Prof': {
-            'Range': {
-                'Col': {
-                    'Ini': 'Q',
-                    'Fin': 'T'
-                },
-                'Fila': 4,
-            },
-            'lbl': 'Profundidad',
-        },
-        'Prof_ini': {
-            'Range': {
-                'Col': {
-                    'Ini': 'Q',
-                    'Fin': 'R'
-                },
-                'Fila': 5,
-            },
-            'lbl': 'Inicial',
-            'campo': True
-        },
-        'Prof_fin': {
-            'Range': {
-                'Col': {
-                    'Ini': 'S',
-                    'Fin': 'T'
-                },
-                'Fila': 5,
-            },
-            'lbl': 'Final',
-            'campo': True,
-        },
-        'Viento': {
-            'Range': {
-                'Col': {
-                    'Ini': 'U',
-                    'Fin': 'X'
-                },
-                'Fila': 4,
-            },
-            'lbl': 'Viento',
-        },
-        'V_Vel': {
-            'Range': {
-                'Col': {
-                    'Ini': 'U',
-                    'Fin': 'V'
-                },
-                'Fila': 5,
-            },
-            'lbl': 'Vel',
-            'campo': True,
-        },
-        'V_Dir': {
-            'Range': {
-                'Col': {
-                    'Ini': 'W',
-                    'Fin': 'X'
-                },
-                'Fila': 5,
-            },
-            'lbl': 'Dir',
-            'campo': True,
-        },
-        'Mar': {
-            'Range': {
-                'Col': {
-                    'Ini': 'Y',
-                    'Fin': 'AB'
-                },
-                'Fila': 4,
-            },
-            'lbl': 'Mar',
-        },
-        'M_Est': {
-            'Range': {
-                'Col': {
-                    'Ini': 'Y',
-                    'Fin': 'Z'
-                },
-                'Fila': 5,
-            },
-            'lbl': 'Est',
-            'campo': True,
-        },
-        'M_Dir': {
-            'Range': {
-                'Col': {
-                    'Ini': 'AA',
-                    'Fin': 'AB'
-                },
-                'Fila': 5,
-            },
-            'lbl': 'Dir',
-            'campo': True,
-        },
-        'Temp': {
-            'Range': {
-                'Col': {
-                    'Ini': 'AC',
-                    'Fin': 'AF'
-                },
-                'Fila': 4,
-            },
-            'lbl': 'Temp',
-            'campo': True,
-        },
-        'CTD': {
-            'Range': {
-                'Col': {
-                    'Ini': 'A',
-                    'Fin': 'D'
-                },
-                'Fila': 8,
-            },
-            'lbl': 'CTD',
-        },
-    }
+# Cargo el archivo SeaSaveIni
 
-    return celdas
+
+def read_SeaSaveIni(file_SeaSaveIni):
+    with open(file_SeaSaveIni, 'r') as file:
+        for line in file:
+            if line.startswith('ITEM_0'):
+                return line.split('=')[1].strip()
+
+
+def read_psa(psa_file):
+    # Parsear el archivo XML
+    tree = ET.parse(psa_file)
+    root = tree.getroot()
+
+    # Buscar el elemento ConfigurationFilePath y obtener su valor
+    configuration_file_path = root.find(
+        './/ConfigurationFilePath').attrib['value']
+    tree = ET.parse(configuration_file_path)
+    root = tree.getroot()
+
+    sensors = []
+    auxiliary_sensors = []
+    instrument_type = root.find('.//Name').text
+    if 'SBE 25plus' in instrument_type:
+        #################################################################
+        # Cargo el xmlcon para un SBE25 plus
+        #################################################################
+        # Buscar sensores TCP (Temperature, Conductivity, Pressure)
+        tcp_sensors = root.find('.//TCP_Sensors')
+        if tcp_sensors is not None:
+            for sensor in tcp_sensors.findall('.//Sensor'):
+                sensor_data = {
+                    'index': int(sensor.get('index')),
+                    # 'SensorID': sensor.get('SensorID'),
+                    'Type': sensor[0].tag,
+                    'SerialNumber': sensor[0].find('SerialNumber').text,
+                    'CalibrationDate': sensor[0].find('CalibrationDate').text
+                }
+
+                # Corroboro que el sensor no sea 'NotInUse'
+                if not sensor[0].tag == 'NotInUse':
+                    sensors.append(sensor_data)
+        # Buscar sensores externos
+        external_sensors = root.find('.//ExternalVoltageSensors')
+        if external_sensors is not None:
+            offset_aux = int(sensors[-1]['index']) + 1
+            for sensor in external_sensors.findall('.//Sensor'):
+                sensor_data = {
+                    'index': int(sensor.get('index')) + offset_aux,
+                    # 'SensorID': int(sensor.get('SensorID')),
+                    'Type': sensor.find('*').tag,
+                    'SerialNumber': sensor.find('.//SerialNumber').text,
+                    'CalibrationDate': sensor[0].find('CalibrationDate').text
+                }
+                if not sensor.find('*').tag == 'NotInUse':
+                    sensors.append(sensor_data)
+
+    elif instrument_type in ['SBE 911', 'SBE 25 Sealogger CTD']:
+        #################################################################
+        # Cargo el xmlcon para un SBE9plus
+        #################################################################
+        for sensor in root.findall(".//SensorArray/Sensor"):
+            sensor_data = {
+                'index': int(sensor.get('index')),
+                # 'SensorID': int(sensor.get('SensorID')),
+                'Type': sensor[0].tag,
+                'SerialNumber': sensor[0].find('SerialNumber').text,
+                'CalibrationDate': sensor[0].find('CalibrationDate').text
+            }
+
+            # Corroboro que el sensor no sea 'NotInUse'
+            if not sensor[0].tag == 'NotInUse':
+                sensors.append(sensor_data)
+
+    # Clasifico los sensores TC en primarios y secundarios y al resto como sensores auxiliares
+    primary_sensors = {}
+    secondary_sensors = {}
+    auxiliary_sensors = {}
+
+    prim = [0, 1, 2]
+    sec = [3, 4]
+    aux = [3, 4, 5, 6, 7, 8]
+    for sensor in sensors:
+        sensor_type = sensor['Type']
+        if sensor['index'] in prim:
+            if sensor_type not in primary_sensors and sensor_type in ['ConductivitySensor', 'TemperatureSensor', 'PressureSensor']:
+                primary_sensors[sensor_type] = []
+                primary_sensors[sensor_type].append(sensor)
+        if sensor['index'] in sec:
+            if sensor_type not in secondary_sensors and sensor_type in ['ConductivitySensor', 'TemperatureSensor']:
+                secondary_sensors[sensor_type] = []
+                secondary_sensors[sensor_type].append(sensor)
+        if sensor['index'] in aux:
+            if sensor_type not in auxiliary_sensors:
+                auxiliary_sensors[sensor_type] = []
+                auxiliary_sensors[sensor_type].append(sensor)
+    sensors = {
+        'PrimarySensor': primary_sensors,
+        'SecondarySensor': secondary_sensors,
+        'AuxiliarySensor': auxiliary_sensors,
+    }
+    return sensors
