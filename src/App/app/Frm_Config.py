@@ -296,7 +296,6 @@ class Frm_Config(QDialog, Ui_Frm_Config):
 
     @pyqtSlot()
     def on_click(self):
-        print("\n")
         for currentQTableWidgetItem in self.tabla_CTD.selectedItems():
             print(currentQTableWidgetItem.row(),
                   currentQTableWidgetItem.column(), currentQTableWidgetItem.text())

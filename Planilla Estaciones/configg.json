@@ -1,0 +1,94 @@
+{
+    "Archivos": [
+        "C:\\Siavo_Estructura\\Estructura\\VA\\2024\\004\\VA202404.json",
+        "C:\\Siavo_Estructura\\Estructura\\VA\\2024\\002\\VA202402.json",
+        "C:\\Users\\ALVAR\\Desktop\\VA202402.json",
+        "C:\\Siavo_Estructura\\Estructura\\MA\\2020\\017\\MA202317.json",
+        "D:\\Programas\\Py\\Planilla_CTD\\VA202306.json",
+        "D:\\Programas\\Py\\Planilla_CTD\\MA202317.json",
+        "D:\\Programas\\Py\\Planilla_CTD\\EH202301.json"
+    ],
+    "Campania": {
+        "Siglasbuque": "VA",
+        "Anio": 2024,
+        "Nrocampania": 4
+    },
+    "Directorios": {
+        "Datos": {
+            "Estructura": "C:\\SiavoVB_Anexo\\Estructura",
+            "seasave7": "C:\\SiavoVB_Anexo\\ConfRutinas",
+            "seasaveini": "C:\\SiavoVB_Anexo\\ConfInstrumentos"
+        },
+        "Adquisicion": {
+            "sea_save_ini": "C:\\Users\\Alvaro\\AppData\\Local\\Sea-Bird\\IniFiles\\seasave.ini",
+            "sea_savev7": "C:\\Program Files (x86)\\Sea-Bird\\SeasaveV7\\Seasave.exe",
+            "sbedataproc": "C:\\Program Files (x86)\\Sea-Bird\\SBEDataProcessing-Win32\\SBEDataProc.exe"
+        },
+        "Estructura": "C:\\SiavoVB_Anexo\\Estructura",
+        "seasave7": "C:\\SiavoVB_Anexo\\ConfRutinas",
+        "seasaveini": "C:\\SiavoVB_Anexo\\ConfInstrumentos"
+    },
+    "Configuracion": {
+        "CTD": {
+            "Variables": "6",
+            "Status": "2",
+            "Intervalo": 5,
+            "Port": "COM5",
+            "BR": "9600",
+            "databits": 8,
+            "Parity": "None",
+            "Stopbits": 1,
+            "filas": [
+                "Scan",
+                " Pres",
+                " Temp",
+                " Cond",
+                " Sal",
+                " Bot"
+            ]
+        },
+        "TSG": {
+            "Variables": "15",
+            "Status": "2",
+            "Intervalo": 30,
+            "Port": "COM15",
+            "BR": "9600",
+            "databits": 8,
+            "Parity": "Even",
+            "Stopbits": 1,
+            "filas": [
+                "ScanCount",
+                "  JulianDays",
+                "  Longitude",
+                "  Latitude",
+                "  Temperature",
+                "  Conductivity",
+                "  Salinity",
+                "  Density",
+                "  TemperatureSBE38",
+                "  SoundVelocity",
+                "  OxygenSaturation",
+                "  Time",
+                "  Elapsed",
+                "  Time",
+                "  NMEA"
+            ]
+        },
+        "NMEA": {
+            "Status": "2",
+            "Intervalo": 3,
+            "Port": "COM9",
+            "BR": "4800",
+            "databits": 8,
+            "Stopbits": 1
+        },
+        "Batimetria": {
+            "Status": "0",
+            "Intervalo": 3,
+            "Port": "COM6",
+            "BR": "9600",
+            "databits": 8,
+            "Stopbits": 1
+        }
+    }
+}

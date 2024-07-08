@@ -122,7 +122,6 @@ class Frm_Inicio(QDialog, Ui_Frm_Inicio):
             i = os.path.basename(i)
             i = i.replace('.json','')
             self.cbox_Cargar.addItem(i)
-            print(i)
 
     def populate_tree_widget(self, data, parent_item=None):
         if parent_item == None:
@@ -147,11 +146,11 @@ class Frm_Inicio(QDialog, Ui_Frm_Inicio):
         if self.focus == 'cbox_Cargar':
             index = self.cbox_Cargar.currentIndex()
             selected_file = self._archivos_json[index]
-            print(f"Archivo seleccionado: {selected_file}")
+            #print(f"Archivo seleccionado: {selected_file}")
         elif self.focus == 'cbox_Recientes':
             index = self.cbox_Recientes.currentIndex()
             selected_file = self._lastfiles[index]
-            print(f"Archivo seleccionado: {selected_file}")
+            #print(f"Archivo seleccionado: {selected_file}")
         if selected_file == "":
             self.btn_Cargar.setEnabled(False)
         else:
@@ -192,8 +191,6 @@ class Frm_Inicio(QDialog, Ui_Frm_Inicio):
     def focusInEventHandler(self, sender_object):
         # Actualizar la etiqueta con información sobre el objeto
         self.focus = sender_object.objectName()
-        #self.btn_Cargar.setEnabled(True)
-        print(self.focus)
 
     @property
     def __GetLastFiles(self):
@@ -223,7 +220,8 @@ class Frm_Inicio(QDialog, Ui_Frm_Inicio):
         if file_dialog.exec_():
             file_paths = file_dialog.selectedFiles()
             for file_path in file_paths:
-                print(f"Archivo seleccionado: {file_path}")  # Aquí puedes manejar el archivo seleccionado según tus necesidades
+                pass
+                #print(f"Archivo seleccionado: {file_path}")  # Aquí puedes manejar el archivo seleccionado según tus necesidades
         try:
             return os.path.normpath(file_path)
         except NameError:
@@ -250,7 +248,8 @@ class Frm_Inicio(QDialog, Ui_Frm_Inicio):
                 index = self.cbox_Cargar.currentIndex()
                 self._selected_file = self._archivos_json[index]
             elif self.focus == 'rbtn_Nueva':
-                print('Nuevo')
+                pass
+                #print('Nuevo')
         elif self.btn_Cargar.text() == 'Importar':
             self._selected_file = self.open_file_dialog()
 

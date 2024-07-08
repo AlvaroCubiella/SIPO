@@ -194,7 +194,7 @@ class NMEA_Ext(QObject):
                 self.line = line
                 self.intReady.emit(line)
             except TimeoutError:
-                logging.critical(
+                logging.warning(
                     f"Timeout al intentar leer el puerto serie {str(self.ser.port)}."
                 )
                 line = {'latD': 'NaN',
@@ -281,6 +281,10 @@ class CTD_Thread(QObject):
                 self.intReady.emit(dato)
             except TimeoutError:
                 self.ser.close()
+                logging.warning(
+                    f"Timeout al intentar leer el puerto serie {str(self.ser.port)}."
+                )
+                self.intReady.emit("NaN")
                 for i, k in enumerate(self.cfg['Configuracion']['CTD']['filas']):
                     self.format[k] = 'NaN'
                 self.intReady.emit(self.format)
@@ -356,7 +360,7 @@ class TSG_Thread(QObject):
                     dato[self.format[i]] = k
                 self.intReady.emit(dato)
             except TimeoutError:
-                logging.critical(
+                logging.warning(
                     f"Timeout al intentar leer el puerto serie {str(self.ser.port)}."
                 )
                 for i, k in enumerate(self.cfg['Configuracion']['TSG']['filas']):
@@ -397,7 +401,7 @@ class DBS_Thread(QObject):
                 self.line = line
                 self.intReady.emit(line)
             except TimeoutError:
-                logging.critical(
+                logging.warning(
                     f"Timeout al intentar leer el puerto serie {str(self.ser.port)}."
                 )
                 self.intReady.emit("NaN")

@@ -6,7 +6,7 @@ import uuid
 # Mini
 key = '4C530006041107108575'
 # Novatech
-key = '0000000000007D'
+# key = '0000000000007D'
 
 
 def get_hard_drive_serial_number():

@@ -13,16 +13,10 @@ def cfg():
             "Nrocampania": 4
         },
         "Directorios": {
-            "Datos": {
-                "Estructura": "C:\\SiavoVB_Anexo\\Estructura",
-                "seasave7": "C:\\SiavoVB_Anexo\\ConfRutinas",
-                "seasaveini": "C:\\SiavoVB_Anexo\\ConfInstrumentos"
-            },
-            "Adquisicion": {
-                "sea_save_ini": "C:\\Users\\Alvaro\\AppData\\Local\\Sea-Bird\\IniFiles\\seasave.ini",
-                "sea_savev7": "C:\\Program Files (x86)\\Sea-Bird\\SeasaveV7\\Seasave.exe",
-                "sbedataproc": "C:\\Program Files (x86)\\Sea-Bird\\SBEDataProcessing-Win32\\SBEDataProc.exe"
-            }
+            "Estructura": "C:\\SiavoVB_Anexo\\Estructura",
+            "seasave7": "C:\\Users\\User\\AppData\\Local\\Sea-Bird\\IniFiles\\seasave.ini",
+            "seasaveini": "C:\\Users\\User\\AppData\\Local\\Sea-Bird\\IniFiles\\Seasave.ini",
+            "sbedataproc": "C:\\Program Files (x86)\\Sea-Bird\\SBEDataProcessing-Win32\\SBEDataProc.exe"
         },
         "Configuracion": {
             "CTD": {
@@ -227,7 +221,7 @@ def read_psa(psa_file):
                 if not sensor.find('*').tag == 'NotInUse':
                     sensors.append(sensor_data)
 
-    elif instrument_type in ['SBE 911', 'SBE 25 Sealogger CTD']:
+    elif instrument_type in ['SBE 911plus/917plus CTD', 'SBE 25 Sealogger CTD']:
         #################################################################
         # Cargo el xmlcon para un SBE9plus
         #################################################################
@@ -263,7 +257,7 @@ def read_psa(psa_file):
                 secondary_sensors[sensor_type] = []
                 secondary_sensors[sensor_type].append(sensor)
         if sensor['index'] in aux:
-            if sensor_type not in auxiliary_sensors:
+            if sensor_type not in auxiliary_sensors and not sensor_type in ['ConductivitySensor', 'TemperatureSensor']:
                 auxiliary_sensors[sensor_type] = []
                 auxiliary_sensors[sensor_type].append(sensor)
     sensors = {
