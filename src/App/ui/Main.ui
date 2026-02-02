@@ -272,6 +272,31 @@
      <string>Skip over</string>
     </property>
    </widget>
+   <widget class="QLineEdit" name="txt_SkipOver">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>135</y>
+      <width>76</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>76</width>
+      <height>25</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>76</width>
+      <height>25</height>
+     </size>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

@@ -684,17 +684,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if self.cfg['Configuracion']['NMEA']['Status'] == '2':
                 self.init_NMEA()
                 self.thread_NMEA.start()
+                logging.info('Hilo NMEA iniciado')
             if self.cfg['Configuracion']['CTD']['Status'] == '2':
                 self.init_CTD()
                 self.thread_CTD.start()
+                logging.info('Hilo CTD iniciado')
             if self.cfg['Configuracion']['TSG']['Status'] == '2':
                 self.init_TSG()
                 self.thread_TSG.start()
+                logging.info('Hilo TSG iniciado')
             if self.cfg['Configuracion']['Batimetria']['Status'] == '2':
                 self.init_DBS()
                 self.thread_DBS.start()
+                logging.info('Hilo DBS iniciado')
         except:
-            logging.error('Error al inicializarña  los hilos')
+            logging.error('Error al inicializar los hilos')
 
     def updateStatusBar(self):
         # Construye la cadena de estado combinada en el statusBar
@@ -733,11 +737,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         path = os.getenv('OF_BUQUE_NROCAMP')
         self.f_json = windows._selected_file
         file_json = os.path.basename(self.f_json)
-        self.file_json = f"{path}{os.sep}{file_json}"
+        self.file_json = os.path.join(path, file_json)
         if self.btn_Inicio.text() == 'Inicio':
-            self.psa_file = utils.read_SeaSaveIni(
-                self.cfg['Directorios']['seasaveini'])
-            self.sensors = utils.read_psa(self.psa_file)
+            self.init_vars()
+            # self.psa_file = utils.read_SeaSaveIni(self.cfg['Directorios']['seasaveini'])
+            xmlcon = os.path.join(
+                self._ROOT_DIR, 'Virgenes', self._xmlcon_file)
+            if not os.path.exists(xmlcon):
+                logging.critical(
+                    f'El archivo de configuracion {xmlcon} no existe')
+                self.msg_Box(mensaje=f'El archivo de configuracion {xmlcon} no existe\nNo se puede inicar',
+                             titulo='xmlcon no encontrado', icono=QMessageBox.Critical)
+                return
+            self.sensors = utils.read_xmlcon(xmlcon)
+            logging.info('xmlcon cargado')
+            # self.sensors = utils.read_psa(self.psa_file)
             if self.txt_EstGral.text() in self.estructura['Estaciones']:
                 reply = QMessageBox.question(self, 'Estación Existente', 'El número de estación ya existe. Desea Continuar? ',
                                              QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
@@ -810,6 +824,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.CTD_str['bot'] = i
 
             self.setAdquisicion()               # Inicio Hilos
+            logging.info('Threads iniciados')
             self.statusAdq = True
             # Contadores de evento para luego armar la planilla de la estacion
             self.countCub = 0
@@ -831,6 +846,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.txt_EstGral.setEnabled(True)
             self.statusAdq = False
             self.W_Pos()
+            self.W_SkipOver()
             self.stop_loop()
 
             reply = QMessageBox.question(self, 'Agregar comentarios', 'Quiere agragar algun comentario de la estación? ',
@@ -871,10 +887,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.fdo = 1
 
     def getSkipover(self):
-        self.estacion[self.txt_EstGral.text(
-        )]['Skipover'] = self.CTD_str['Scan']
-        self.save_json()
-        self.btn_skipover.setEnabled(False)
+        self.txt_SkipOver.setText(self.CTD_str['Scan'])
+        # self.estacion[self.txt_EstGral.text(
+        # )]['Skipover'] = self.CTD_str['Scan']
+        # self.save_json()
+        # self.btn_skipover.setEnabled(False)
 
     # Abro el formulario de configuracion
     def Frm_Config_load(self, event):
@@ -920,7 +937,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.DBS.working = False
 
     ###########################################################################
-    # Guardo archivo json
+    # Administro archivo json
     ###########################################################################
     def save_json(self):
 
@@ -931,6 +948,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     ###########################################################################
     # Eventos de Adquisicion
     ###########################################################################
+    def init_vars(self):
+        ROOT = self.cfg['Directorios']['Estructura']
+        buque = str(self.cfg['Campania']['Siglasbuque'])
+        anio = str(self.cfg['Campania']['Anio'])
+        nrocamp = str(self.cfg['Campania']['Nrocampania']).zfill(3)
+        self._ROOT_DIR = os.path.join(ROOT, buque, anio, nrocamp)
+        self._hex_file = f"{self.txt_EstGral.text().zfill(4)}.hex"
+        self._xmlcon_file = f"{self.txt_EstGral.text().zfill(4)}.xmlcon"
+        return
+
     def W_Pos(self):
         if self.statusAdq:
             # Si es vardadero esta adquiriendo. Modifico las variables iniciales
@@ -943,30 +970,30 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.estacion[self.txt_EstGral.text(
             )]['FechaHora']['Inicio']['FechaGMT'] = self.NMEA.line['fecha']
             self.estacion[self.txt_EstGral.text(
-            )]['Batimetria']['Inicio'] = str(self.DBS.line)
+            )]['Batimetria']['Inicio'] = self.DBS_Str
             # Reorganizar los sensores dentro de Instrumento
             # Primarios
-            for sensor_type, sensor_list in self.sensors.get('PrimarySensor', {}).items():
+            for sensor_type, sensor_list in self.sensors.GetPrimary().items():
                 self.estacion[self.txt_EstGral.text(
                 )]['Instrumento']['Sensores']['Primarios'][sensor_type] = {
-                    'SerialNumber': sensor_list[0]['SerialNumber'],
-                    'CalibrationDate': sensor_list[0]['CalibrationDate'],
+                    'SerialNumber': sensor_list['SerialNumber'],
+                    'CalibrationDate': sensor_list['CalibrationDate'],
                 }
 
             # Secundarios
-            for sensor_type, sensor_list in self.sensors.get('SecondarySensor', {}).items():
+            for sensor_type, sensor_list in self.sensors.GetSecondary().items():
                 self.estacion[self.txt_EstGral.text(
                 )]['Instrumento']['Sensores']['Secundarios'][sensor_type] = {
-                    'SerialNumber': sensor_list[0]['SerialNumber'],
-                    'CalibrationDate': sensor_list[0]['CalibrationDate'],
+                    'SerialNumber': sensor_list['SerialNumber'],
+                    'CalibrationDate': sensor_list['CalibrationDate'],
                 }
 
             # Auxiliares
-            for sensor_type, sensor_list in self.sensors.get('AuxiliarySensor', {}).items():
+            for sensor_type, sensor_list in self.sensors.GetAuxiliary().items():
                 self.estacion[self.txt_EstGral.text(
                 )]['Instrumento']['Sensores']['Auxiliares'][sensor_type] = {
-                    'SerialNumber': sensor_list[0]['SerialNumber'],
-                    'CalibrationDate': sensor_list[0]['CalibrationDate'],
+                    'SerialNumber': sensor_list['SerialNumber'],
+                    'CalibrationDate': sensor_list['CalibrationDate'],
                 }
         else:
             # Deje de adquirir. Modifico las variables finales
@@ -982,7 +1009,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             )]['Batimetria']['Fin'] = str(self.DBS_Str)
         self.save_json()
 
+    def W_SkipOver(self):
+        """
+        Al terminar la estacion, salva el valor de SkipOver en el archivo de estructura JSON.
+        """
+        try:
+            self.estacion[self.txt_EstGral.text(
+            )]['Skipover'] = self.txt_SkipOver.text()
+        except:
+            pass
+        self.save_json()
+
     def W_Bott(self):
+        """
+        Salva el registro del CTD al momento de disparar una Botella Niskin en el archivo de estructura JSON.
+        """
         try:
             self.estacion[self.txt_EstGral.text(
             )]['Botellas'][self.CTD_str['Bot']] = self.CTD_str

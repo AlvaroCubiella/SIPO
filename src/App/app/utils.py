@@ -1,4 +1,5 @@
 import os
+from app.xmlcon_rd import xmlcon_rd
 import xml.etree.ElementTree as ET
 
 
@@ -265,4 +266,9 @@ def read_psa(psa_file):
         'SecondarySensor': secondary_sensors,
         'AuxiliarySensor': auxiliary_sensors,
     }
+    return sensors
+
+
+def read_xmlcon(xmlcon_file):
+    sensors = xmlcon_rd(xmlcon_file)
     return sensors

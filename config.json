@@ -1,20 +1,20 @@
 {
     "Archivos": [
-        "C:\\Siavo_Estructura\\Estructura\\VA\\2024\\004\\VA202404.json",
-        "C:\\Siavo_Estructura\\Estructura\\VA\\2024\\002\\VA202402.json",
-        "C:\\Siavo_Estructura\\Estructura\\MA\\2020\\017\\MA202317.json",
-        "C:\\Users\\ALVAR\\Desktop\\VA202402.json",
-        "D:\\Programas\\Py\\Planilla_CTD\\VA202306.json",
-        "D:\\Programas\\Py\\Planilla_CTD\\MA202317.json",
-        "D:\\Programas\\Py\\Planilla_CTD\\EH202301.json"
+        "C:\\Siavo_Estructura\\Estructura\\VA\\2024\\011\\VA202411.json",
+        "C:\\Siavo_Estructura\\Estructura\\MA\\2024\\015\\MA202415.json",
+        "C:\\Siavo_Estructura\\Estructura\\MA\\2024\\013\\MA202413.json",
+        "C:\\Users\\ALVAR\\Desktop\\VA202411.json",
+        "C:\\Users\\ALVAR\\Desktop\\MA202413.json",
+        "C:\\Siavo_Estructura\\Estructura\\VA\\2024\\006\\VA202406.json",
+        "E:\\SiavoVB_Anexo\\Estructura\\VA\\2024\\006\\VA202406.json"
     ],
     "Campania": {
         "Siglasbuque": "VA",
         "Anio": 2024,
-        "Nrocampania": 4
+        "Nrocampania": 11
     },
     "Directorios": {
-        "Estructura": "C:\\SiavoVB_Anexo\\Estructura",
+        "Estructura": "C:\\Siavo_Estructura\\Estructura",
         "seasave7": "C:\\Users\\Alvaro\\AppData\\Local\\Sea-Bird\\IniFiles\\seasave.ini",
         "seasaveini": "C:\\Users\\ALVAR\\AppData\\Local\\Sea-Bird\\IniFiles\\Seasave.ini",
         "sbedataproc": "C:\\Program Files (x86)\\Sea-Bird\\SBEDataProcessing-Win32\\SBEDataProc.exe"
@@ -22,7 +22,7 @@
     "Configuracion": {
         "CTD": {
             "Variables": "6",
-            "Status": "0",
+            "Status": "2",
             "Intervalo": 5,
             "Port": "COM16",
             "BR": "9600",
@@ -40,7 +40,7 @@
         },
         "TSG": {
             "Variables": "9",
-            "Status": "0",
+            "Status": "2",
             "Intervalo": 30,
             "Port": "COM15",
             "BR": "9600",
@@ -68,7 +68,7 @@
             "Stopbits": 1
         },
         "Batimetria": {
-            "Status": "2",
+            "Status": "0",
             "Intervalo": 3,
             "Port": "COM11",
             "BR": "4800",
