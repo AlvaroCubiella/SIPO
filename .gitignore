@@ -3,6 +3,7 @@
 *.exe
 # videos
 videos/
+IA/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

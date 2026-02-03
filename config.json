@@ -1,17 +1,17 @@
 {
     "Archivos": [
+        "E:\\SiavoVB_Anexo\\Estructura\\VA\\2024\\006\\VA202406.json",
         "C:\\Siavo_Estructura\\Estructura\\VA\\2024\\011\\VA202411.json",
         "C:\\Siavo_Estructura\\Estructura\\MA\\2024\\015\\MA202415.json",
         "C:\\Siavo_Estructura\\Estructura\\MA\\2024\\013\\MA202413.json",
         "C:\\Users\\ALVAR\\Desktop\\VA202411.json",
         "C:\\Users\\ALVAR\\Desktop\\MA202413.json",
-        "C:\\Siavo_Estructura\\Estructura\\VA\\2024\\006\\VA202406.json",
-        "E:\\SiavoVB_Anexo\\Estructura\\VA\\2024\\006\\VA202406.json"
+        "C:\\Siavo_Estructura\\Estructura\\VA\\2024\\006\\VA202406.json"
     ],
     "Campania": {
         "Siglasbuque": "VA",
         "Anio": 2024,
-        "Nrocampania": 11
+        "Nrocampania": 6
     },
     "Directorios": {
         "Estructura": "C:\\Siavo_Estructura\\Estructura",

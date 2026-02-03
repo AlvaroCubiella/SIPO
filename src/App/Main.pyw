@@ -1,13 +1,16 @@
-# -------------------------------------------------------------------------------
-# Name:        Planilla_CTD
-# Purpose:     Capturar los datos de los instrumentos durante una estacion oceanografica.
-#              Son almacenados enuna estructura JSON
-# Author:      Alvaro Cubiella
-#
-# Created:     19/07/2020
-# Copyright:   (c) Alvaro Cubiella 2024
-# Licence:     MIT
-# -------------------------------------------------------------------------------
+"""
+SIPO (Sistema de Integración de Perfiles Oceanograficos)
+
+SIPO es una solución integral para la gestión y consolidación de datos recolectados durante campañas oceanográficas. 
+    - El sistema automatiza la fusión de flujos de datos provenientes de múltiples sensores y fuentes:
+
+    - Integración de Datos de Sensores: Sincroniza registros de CTD (Conductividad, Temperatura, Presión) con sistemas TSG (Termosalinógrafo).
+
+    - Georreferenciación y Batimetría: Vincula automáticamente cada muestra con coordenadas GPS (Latitud/Longitud) y datos de profundidad del ecosonda.
+
+    - Gestión de Metadatos: Almacena información crítica de la expedición, incluyendo el buque, números de serie de los sensores y sus fechas de última calibración.
+
+    - Estructura Estandarizada: Genera salidas en formato JSON jerárquico, facilitando el post-procesamiento científico y la trazabilidad de las estaciones (Superficie, Fondo y Cubierta)."""
 
 import sys
 import os
@@ -41,6 +44,8 @@ from gui.Frm_Note_ui import *
 from app import Frm_Config
 from app import Frm_Inicio
 from app import Frm_Note
+from app.StationManager import StationManager
+from app.SerialWorkers import NMEA_Worker, CTD_Worker, TSG_Worker, DBS_Worker
 
 from dotenv import load_dotenv
 
@@ -61,352 +66,8 @@ logging.basicConfig(level=logging.INFO,
                     filename='App.log',
                     filemode='a')
 
-try:
-    unicode
-except (NameError, AttributeError):
-    unicode = str       # for Python 3, pylint: disable=redefined-builtin,invalid-name
+# Helper functions and Worker classes moved to app.SerialWorkers.py
 
-# Todas las versiones de Python anteriores a 3.x convierten ``str([17])`` a '[17]' en lugar de '\x11'
-# por lo que un simple ``bytes(sequence)`` no funciona para todas las versiones
-
-
-def to_bytes(seq):
-    """convert a sequence to a bytes type"""
-    if isinstance(seq, bytes):
-        return seq
-    elif isinstance(seq, bytearray):
-        return bytes(seq)
-    elif isinstance(seq, memoryview):
-        return seq.tobytes()
-    elif isinstance(seq, unicode):
-        raise TypeError(
-            'unicode strings are not supported, please encode to bytes: {!r}'.format(seq))
-    else:
-        # handle list of integers and bytes (one or more items) for Python 2 and 3
-        return bytes(bytearray(seq))
-
-
-LF = to_bytes([10])
-
-
-class Timeout(object):
-    """
-    Abstracción para operaciones de tiempo de espera. Utiliza time.monotonic() si está disponible
-    o time.time() en todos los demás casos.
-
-    La clase también se puede inicializar con 0 o None, para soportar
-    operaciones de E/S no bloqueantes y completamente bloqueantes. Los atributos
-    is_non_blocking y is_infinite se establecen en consecuencia.
-    """
-    if hasattr(time, 'monotonic'):
-        # Implementación de timeout con time.monotonic(). Esta función solo
-        # es compatible con Python 3.3 y versiones superiores. Devuelve un tiempo en segundos
-        # (float) igual que time.time(), pero no se ve afectada por los ajustes del reloj
-        # del sistema.
-        TIME = time.monotonic
-    else:
-        # Implementación de timeout con time.time(). Esto es compatible con todas
-        # las versiones de Python pero tiene problemas si el reloj se ajusta mientras
-        # el timeout está en ejecución.
-        TIME = time.time
-
-    def __init__(self, duration):
-        """Inicializa un timeout con la duración dada"""
-        self.is_infinite = (duration is None)
-        self.is_non_blocking = (duration == 0)
-        self.duration = duration
-        if duration is not None:
-            self.target_time = self.TIME() + duration
-        else:
-            self.target_time = None
-
-    def expired(self):
-        """Devuelve un booleano, indicando si el tiempo de espera ha expirado"""
-        return self.target_time is not None and self.time_left() <= 0
-
-    def time_left(self):
-        """Devuelve cuántos segundos quedan hasta que expire el tiempo de espera"""
-        if self.is_non_blocking:
-            return 0
-        elif self.is_infinite:
-            return None
-        else:
-            delta = self.target_time - self.TIME()
-            if delta > self.duration:
-                # clock jumped, recalculate
-                self.target_time = self.TIME() + self.duration
-                return self.duration
-            else:
-                return max(0, delta)
-
-    def restart(self, duration):
-        """\
-        Reinicia un tiempo de espera, solo soportado si ya se había configurado un tiempo de espera
-        antes.
-        """
-        self.duration = duration
-        self.target_time = self.TIME() + duration
-
-#########################################################################################
-# Hilo para leer la señal NMEA
-#########################################################################################
-
-
-class NMEA_Ext(QObject):
-    """
-    Hilo que administra la lectura del puerto serie asigado permanentemente. Cada vez que se completa la lectura de la sentencia NMEA establecida,
-    emite un intReady el cual es atendido por el programa principal. De esta forma, se mantiene el dato de posicioamiento, fecha y hora 
-    constantemente actualizado.
-    """
-    finished = pyqtSignal()
-    # le digo que la señal a enviar es un diccionario
-    intReady = pyqtSignal(dict)
-
-    @pyqtSlot()
-    def __init__(self, ser):
-        super(NMEA_Ext, self).__init__()
-        self.working = True
-        self.ser = RMC(port=ser.port, BR=ser.baudrate, timeout=2)
-        self.line = {
-            'latD': 'NaN',
-            'lonD': 'NaN',
-            'lat': 'NaN',
-            'lon': 'NaN',
-            'hora': 'NaN',
-            'fecha': 'NaN',
-            'Velocidad': 'NaN',
-        }
-
-    def work(self):
-        while self.working:
-            try:
-                # line=''
-                line = self.ser.Read()
-                line = {
-                    'latD': self.ser.Get_Latitud_Grados(),
-                    'lonD': self.ser.Get_Longitud_Grados(),
-                    'lat': self.ser.Get_Lat_GradosMinutos(),
-                    'lon': self.ser.Get_Lon_GradosMinutos(),
-                    'hora': self.ser.Get_Time(),
-                    'fecha': self.ser.Get_Date(sep=''),
-                    'Velocidad': self.ser.Get_Speed()
-                }
-                self.line = line
-                self.intReady.emit(line)
-            except TimeoutError:
-                logging.warning(
-                    f"Timeout al intentar leer el puerto serie {str(self.ser.port)}."
-                )
-                line = {'latD': 'NaN',
-                        'lonD': 'NaN',
-                        'lat': 'NaN',
-                        'lon': 'NaN',
-                        'hora': 'NaN',
-                        'fecha': 'NaN',
-                        'Velocidad': 'NaN',
-                        }
-                self.line = line
-                # En Timeout envia los datos en NaN
-                self.intReady.emit(line)
-            time.sleep(0.05)
-        self.finished.emit()
-
-#########################################################################################
-# Hilo para leer la señal CTD
-#########################################################################################
-
-
-class CTD_Thread(QObject):
-    """
-    Hilo que administra la lectura del puerto serie asigado permanentemente. Cada vez que se completa la lectura de la sentencia NMEA establecida,
-    emite un intReady el cual es atendido por el programa principal. De esta forma, se mantienen los dato de CTD actualizados.
-    """
-    finished = pyqtSignal()
-    # le digo que la señal a enviar es un diccionario
-    intReady = pyqtSignal(dict)
-
-    @pyqtSlot()
-    def __init__(self, ser):
-        super(CTD_Thread, self).__init__()
-        self.working = True
-        self.ser = serial.Serial(
-            port=ser.port, baudrate=ser.baudrate, timeout=5)
-        _Config = Cfg()
-        self.cfg = _Config.GetCfg()
-        self.data_format()
-
-    def data_format(self):
-        # Armo un diccionario con las variables en el orden correspondiente
-        self.format = dict()
-        for i, k in enumerate(self.cfg['Configuracion']['CTD']['filas']):
-            self.format[i] = k.split()[0]
-
-    def Read_until(self, expected=LF, size=None):
-        """\
-        Read until an expected sequence is found ('\n' by default), the size
-        is exceeded or until timeout occurs.
-        """
-        lenterm = len(expected)
-        line = bytearray()
-        timeout = Timeout(self.ser.timeout)
-        while True:
-            if not self.ser.is_open:
-                self.ser.open()
-            c = self.ser.read(1)
-            if c:
-                line += c
-                if line[-lenterm:] == expected:
-                    break
-                if size is not None and len(line) >= size:
-                    break
-            else:
-                raise TimeoutError
-            if timeout.expired():
-                break
-        return bytes(line)
-
-    def work(self):
-        if not self.ser.is_open:
-            self.ser.open()
-        while self.working:
-            dato = dict()
-            try:
-                self.ser.reset_input_buffer()  # Borro buffer del puerto serie
-                self.ser.reset_input_buffer()  # Borro buffer del puerto serie
-                # dato = comm_NMEA.read_until().decode('ASCII')
-                line = self.Read_until().decode('ASCII')
-                line = line.split()
-                for i, k in enumerate(line):
-                    dato[self.format[i]] = k
-                self.intReady.emit(dato)
-            except TimeoutError:
-                self.ser.close()
-                logging.warning(
-                    f"Timeout al intentar leer el puerto serie {str(self.ser.port)}."
-                )
-                self.intReady.emit("NaN")
-                for i, k in enumerate(self.cfg['Configuracion']['CTD']['filas']):
-                    self.format[k] = 'NaN'
-                self.intReady.emit(self.format)
-            except serial.SerialException:
-                # -- Error al abrir el puerto serie
-                logging.critical('Ocurrio un error al intentar de abrir el puerto serie seleccionado.\r\n \
-                        No se pudo completar la operacion. Puerto %s' % (str(self.ser.port)))
-                self.working = False
-            time.sleep(0.05)
-        self.ser.close()
-        self.finished.emit()
-
-#########################################################################################
-# Hilo para leer la señal TSG
-#########################################################################################
-
-
-class TSG_Thread(QObject):
-    finished = pyqtSignal()
-    # le digo que la señal a enviar es un diccionario
-    intReady = pyqtSignal(dict)
-
-    @pyqtSlot()
-    def __init__(self, ser):
-        super(TSG_Thread, self).__init__()
-        self.working = True
-        self.ser = serial.Serial(
-            port=ser.port, baudrate=ser.baudrate, timeout=ser.timeout)
-        _Config = Cfg()
-        self.cfg = _Config.GetCfg()
-        self.data_format()
-
-    def data_format(self):
-        # Armo un diccionario con las variables en el orden correspondiente
-        self.format = dict()
-        for i, k in enumerate(self.cfg['Configuracion']['TSG']['filas']):
-            self.format[i] = k.split()[0]
-
-    def Read_until(self, expected=LF, size=None):
-        """\
-        Read until an expected sequence is found ('\n' by default), the size
-        is exceeded or until timeout occurs.
-        """
-        lenterm = len(expected)
-        line = bytearray()
-        timeout = Timeout(self.ser.timeout)
-        while True:
-            c = self.ser.read(1)
-            if c:
-                line += c
-                if line[-lenterm:] == expected:
-                    break
-                if size is not None and len(line) >= size:
-                    break
-            else:
-                raise TimeoutError
-            if timeout.expired():
-                break
-        return bytes(line)
-
-    def work(self):
-        if not self.ser.is_open:
-            self.ser.open()
-        while self.working:
-            dato = dict()
-            try:
-                self.ser.reset_input_buffer()  # Borro buffer del puerto serie
-                self.ser.reset_input_buffer()  # Borro buffer del puerto serie
-                # dato = comm_NMEA.read_until().decode('ASCII')
-                line = self.Read_until().decode('ASCII')
-                line = line.split()
-                for i, k in enumerate(line):
-                    dato[self.format[i]] = k
-                self.intReady.emit(dato)
-            except TimeoutError:
-                logging.warning(
-                    f"Timeout al intentar leer el puerto serie {str(self.ser.port)}."
-                )
-                for i, k in enumerate(self.cfg['Configuracion']['TSG']['filas']):
-                    self.format[k] = 'NaN'
-                self.intReady.emit(self.format)
-            except serial.SerialException:
-                # -- Error al abrir el puerto serie
-                logging.critical(
-                    f"Ocurrio un error al intentar de abrir el puerto serie {str(self.ser.port)}."
-                )
-                # self.working = False
-            time.sleep(0.05)
-        self.ser.close()
-        self.finished.emit()
-
-
-###########################################################################
-# Hilo Batimetria
-###########################################################################
-class DBS_Thread(QObject):
-    finished = pyqtSignal()
-    # le digo que la señal a enviar es un diccionario
-    intReady = pyqtSignal(str)
-
-    @pyqtSlot()
-    def __init__(self, ser):
-        super(DBS_Thread, self).__init__()
-        self.working = True
-        self.ser = DBS(port=ser.port, BR=ser.baudrate, timeout=3)
-        self.line = 'NaN'
-
-    def work(self):
-        while self.working:
-            try:
-                # line=''
-                self.ser.Read()
-                line = self.ser.Get_Z_Metros()
-                self.line = line
-                self.intReady.emit(line)
-            except TimeoutError:
-                logging.warning(
-                    f"Timeout al intentar leer el puerto serie {str(self.ser.port)}."
-                )
-                self.intReady.emit("NaN")
-            time.sleep(0.05)
-        self.finished.emit()
 
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -432,6 +93,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                             QtCore.Qt.WindowStaysOnTopHint)  # Pone la ventana en modo persistente
         self.setupUi(self)
         self.setWindowTitle(f"Planilla V.{(__version__)}")
+        self.station_manager = StationManager(self.cfg, self.estructura)
         self.thread = None
         self.worker = None
 
@@ -504,7 +166,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                 timeout=self.cfg['Configuracion']['NMEA']['Intervalo'],
                                 )
             ser.close()
-            self.NMEA = NMEA_Ext(ser)
+            self.NMEA = NMEA_Worker(ser)
             self.thread_NMEA = QThread()
             self.NMEA.moveToThread(self.thread_NMEA)
             self.thread_NMEA.started.connect(self.NMEA.work)
@@ -542,7 +204,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                 )
             ser.close()
             # a new worker to perform those tasks
-            self.DBS = DBS_Thread(ser)
+            self.DBS = DBS_Worker(ser)
             # a new thread to run our background tasks in
             self.thread_DBS = QThread()
             # move the worker into the thread, do this first before connecting the signals
@@ -588,7 +250,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                 )
             ser.close()
             # a new worker to perform those tasks
-            self.CTD = CTD_Thread(ser)
+            self.CTD = CTD_Worker(ser)
             # a new thread to run our background tasks in
             self.thread_CTD = QThread()
             # move the worker into the thread, do this first before connecting the signals
@@ -631,7 +293,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             ser.timeout = self.cfg['Configuracion']['TSG']['Intervalo'] + 1
             ser.close()
             # a new worker to perform those tasks
-            self.TSG = TSG_Thread(ser)
+            self.TSG = TSG_Worker(ser)
             # a new thread to run our background tasks in
             self.thread_TSG = QThread()
             # move the worker into the thread, do this first before connecting the signals
@@ -736,50 +398,44 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # cargo la ruta de la campaña activa a partir de las variables de entorno
         path = os.getenv('OF_BUQUE_NROCAMP')
         self.f_json = windows._selected_file
-        file_json = os.path.basename(self.f_json)
-        self.file_json = os.path.join(path, file_json)
+        
+        # Seteo el directorio de trabajo en el manager
+        self.station_manager.set_working_dir(self.f_json)
+
         if self.btn_Inicio.text() == 'Inicio':
-            self.init_vars()
-            # self.psa_file = utils.read_SeaSaveIni(self.cfg['Directorios']['seasaveini'])
-            xmlcon = os.path.join(
-                self._ROOT_DIR, 'Virgenes', self._xmlcon_file)
-            if not os.path.exists(xmlcon):
-                logging.critical(
-                    f'El archivo de configuracion {xmlcon} no existe')
-                self.msg_Box(mensaje=f'El archivo de configuracion {xmlcon} no existe\nNo se puede inicar',
+            # Verificaciones previas
+            self.station_manager.nro_estacion = self.txt_EstGral.text()
+            self.station_manager.init_vars() # Preparar rutas
+            
+            exists, xmlcon_path = self.station_manager.check_xmlcon_exists()
+            if not exists:
+                logging.critical(f'El archivo de configuracion {xmlcon_path} no existe')
+                self.msg_Box(mensaje=f'El archivo de configuracion {xmlcon_path} no existe\nNo se puede inicar',
                              titulo='xmlcon no encontrado', icono=QMessageBox.Critical)
                 return
-            self.sensors = utils.read_xmlcon(xmlcon)
-            logging.info('xmlcon cargado')
-            # self.sensors = utils.read_psa(self.psa_file)
-            if self.txt_EstGral.text() in self.estructura['Estaciones']:
+            
+            # Chequeo si existe estacion
+            if self.station_manager.station_exists(self.txt_EstGral.text()):
                 reply = QMessageBox.question(self, 'Estación Existente', 'El número de estación ya existe. Desea Continuar? ',
                                              QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
                 if reply == QMessageBox.No:
                     return
+
+            # Iniciar Estacion
+            self.station_manager.start_station(self.txt_EstGral.text())
 
             self.btn_Inicio.setText('Fin')
             self.btn_Cubierta.setEnabled(True)
             self.txt_EstGral.setEnabled(False)
             self.Menu_Config.setEnabled(False)
             self.fdo = 0
-
-            ########################################################################
-            # Cargo orden variables
-            ########################################################################
-            self.fire_bott = '0'
+            
+            # Inicialización de variables locales para mapeo (Lógica heredada mantenida por seguridad)
             # TSG
-            # Inicializo variables
             self.TSG_str = {
-                'scan': 'NaN',
-                'lat': 'NaN',
-                'lon': 'NaN',
-                'sal': 'NaN',
-                'temp': 'NaN',
-                'cond': 'NaN',
-                'temp38': 'NaN',
+                'scan': 'NaN', 'lat': 'NaN', 'lon': 'NaN', 'sal': 'NaN',
+                'temp': 'NaN', 'cond': 'NaN', 'temp38': 'NaN',
             }
-
             Nom_var = self.cfg['Configuracion']['TSG']['filas']
             for i in range(0, len(Nom_var)):
                 if 'Scan' in Nom_var[i] or 'scan' in Nom_var[i]:
@@ -798,16 +454,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.TSG_str['temp38'] = i
 
             # CTD
-            # Inicializo variables
             self.CTD_str = {
-                'cond': 'NaN',
-                'press': 'NaN',
-                'sal': 'NaN',
-                'scan': 'NaN',
-                'temp': 'NaN',
-                'bot': 'NaN',
+                'cond': 'NaN', 'press': 'NaN', 'sal': 'NaN',
+                'scan': 'NaN', 'temp': 'NaN', 'bot': 'NaN',
             }
-
             Nom_var = self.cfg['Configuracion']['CTD']['filas']
             for i in range(0, len(Nom_var)):
                 if 'Scan' in Nom_var[i] or 'scan' in Nom_var[i]:
@@ -825,17 +475,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             self.setAdquisicion()               # Inicio Hilos
             logging.info('Threads iniciados')
-            self.statusAdq = True
-            # Contadores de evento para luego armar la planilla de la estacion
-            self.countCub = 0
-            self.countSup = 0
-            self.countFdo = 0
-            self.estacion = dict()
-            estacion = utils.Estacion()
-            estacion['NroEstacion'] = self.txt_EstGral.text()
-            self.estacion[self.txt_EstGral.text()] = estacion
+            
             time.sleep(1)
-            self.W_Pos()
+            # Registrar Posicion Inicio
+            self.station_manager.W_Pos(self.NMEA_Str, self.DBS_Str, is_start=True)
+            
         else:
             self.btn_Inicio.setText('Inicio')
             self.Menu_Config.setEnabled(True)
@@ -844,9 +488,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.btn_skipover.setEnabled(False)
             self.btn_Fondo.setEnabled(False)
             self.txt_EstGral.setEnabled(True)
-            self.statusAdq = False
-            self.W_Pos()
-            self.W_SkipOver()
+            
+            # Registrar Posicion Fin
+            self.station_manager.W_Pos(self.NMEA_Str, self.DBS_Str, is_start=False)
+            self.station_manager.W_SkipOver(self.txt_SkipOver.text())
+            self.station_manager.stop_station()
+            
             self.stop_loop()
 
             reply = QMessageBox.question(self, 'Agregar comentarios', 'Quiere agragar algun comentario de la estación? ',
@@ -860,8 +507,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 pass
 
     def click_btn_Cubierta(self):
-        self.W_CTD(pos=self.countCub, loc='Cubierta')
-        self.countCub += 1
+        self.station_manager.W_CTD(self.CTD_str, loc='Cubierta')
         if self.fdo == 0:
             self.btn_Cubierta.setEnabled(False)
             self.btn_Superficie.setEnabled(True)
@@ -870,7 +516,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.btn_Cubierta.setEnabled(False)
 
     def click_btn_Superficie(self):
-        self.W_TSGvsCTD()
+        self.station_manager.W_TSGvsCTD(self.CTD_str, self.TSG_str, self.NMEA_Str)
         if self.fdo == 0:
             self.btn_Superficie.setEnabled(False)
             # self.btn_skipover.setEnabled(False)
@@ -880,14 +526,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.btn_Cubierta.setEnabled(True)
 
     def click_btn_Fondo(self):
-        self.W_CTD(pos=self.countFdo, loc='Fondo')
-        self.countFdo += 1
+        self.station_manager.W_CTD(self.CTD_str, loc='Fondo')
         self.btn_Fondo.setEnabled(False)
         self.btn_Superficie.setEnabled(True)
         self.fdo = 1
 
     def getSkipover(self):
-        self.txt_SkipOver.setText(self.CTD_str['Scan'])
+        self.txt_SkipOver.setText(self.CTD_str.get('Scan', 'NaN'))
         # self.estacion[self.txt_EstGral.text(
         # )]['Skipover'] = self.CTD_str['Scan']
         # self.save_json()
@@ -903,9 +548,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.win_note.lbl_Titulo.setText(
             f"Estación General {self.txt_EstGral.text()}")
         self.win_note.exec_()
-        self.estacion[self.txt_EstGral.text(
-        )]['Comentarios'] = self.win_note.comentario
-        self.save_json()
+        self.station_manager.add_comment(self.win_note.comentario)
 
     ########################################################################
     # Finalizo el programa
@@ -939,114 +582,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     ###########################################################################
     # Administro archivo json
     ###########################################################################
-    def save_json(self):
-
-        self.estructura['Estaciones'].update(self.estacion)
-        with open(self.file_json, 'w+') as archivo:
-            json.dump(self.estructura, archivo, indent=4)
-
-    ###########################################################################
-    # Eventos de Adquisicion
-    ###########################################################################
-    def init_vars(self):
-        ROOT = self.cfg['Directorios']['Estructura']
-        buque = str(self.cfg['Campania']['Siglasbuque'])
-        anio = str(self.cfg['Campania']['Anio'])
-        nrocamp = str(self.cfg['Campania']['Nrocampania']).zfill(3)
-        self._ROOT_DIR = os.path.join(ROOT, buque, anio, nrocamp)
-        self._hex_file = f"{self.txt_EstGral.text().zfill(4)}.hex"
-        self._xmlcon_file = f"{self.txt_EstGral.text().zfill(4)}.xmlcon"
-        return
-
-    def W_Pos(self):
-        if self.statusAdq:
-            # Si es vardadero esta adquiriendo. Modifico las variables iniciales
-            self.estacion[self.txt_EstGral.text(
-            )]['Posicion']['Inicio']['Latitud'] = self.NMEA.line['latD']
-            self.estacion[self.txt_EstGral.text(
-            )]['Posicion']['Inicio']['Longitud'] = self.NMEA.line['lonD']
-            self.estacion[self.txt_EstGral.text(
-            )]['FechaHora']['Inicio']['HoraGMT'] = self.NMEA.line['hora']
-            self.estacion[self.txt_EstGral.text(
-            )]['FechaHora']['Inicio']['FechaGMT'] = self.NMEA.line['fecha']
-            self.estacion[self.txt_EstGral.text(
-            )]['Batimetria']['Inicio'] = self.DBS_Str
-            # Reorganizar los sensores dentro de Instrumento
-            # Primarios
-            for sensor_type, sensor_list in self.sensors.GetPrimary().items():
-                self.estacion[self.txt_EstGral.text(
-                )]['Instrumento']['Sensores']['Primarios'][sensor_type] = {
-                    'SerialNumber': sensor_list['SerialNumber'],
-                    'CalibrationDate': sensor_list['CalibrationDate'],
-                }
-
-            # Secundarios
-            for sensor_type, sensor_list in self.sensors.GetSecondary().items():
-                self.estacion[self.txt_EstGral.text(
-                )]['Instrumento']['Sensores']['Secundarios'][sensor_type] = {
-                    'SerialNumber': sensor_list['SerialNumber'],
-                    'CalibrationDate': sensor_list['CalibrationDate'],
-                }
-
-            # Auxiliares
-            for sensor_type, sensor_list in self.sensors.GetAuxiliary().items():
-                self.estacion[self.txt_EstGral.text(
-                )]['Instrumento']['Sensores']['Auxiliares'][sensor_type] = {
-                    'SerialNumber': sensor_list['SerialNumber'],
-                    'CalibrationDate': sensor_list['CalibrationDate'],
-                }
-        else:
-            # Deje de adquirir. Modifico las variables finales
-            self.estacion[self.txt_EstGral.text(
-            )]['Posicion']['Fin']['Latitud'] = self.NMEA_Str['latD']
-            self.estacion[self.txt_EstGral.text(
-            )]['Posicion']['Fin']['Longitud'] = self.NMEA_Str['lonD']
-            self.estacion[self.txt_EstGral.text(
-            )]['FechaHora']['Fin']['HoraGMT'] = self.NMEA_Str['hora']
-            self.estacion[self.txt_EstGral.text(
-            )]['FechaHora']['Fin']['FechaGMT'] = self.NMEA_Str['fecha']
-            self.estacion[self.txt_EstGral.text(
-            )]['Batimetria']['Fin'] = str(self.DBS_Str)
-        self.save_json()
-
-    def W_SkipOver(self):
-        """
-        Al terminar la estacion, salva el valor de SkipOver en el archivo de estructura JSON.
-        """
-        try:
-            self.estacion[self.txt_EstGral.text(
-            )]['Skipover'] = self.txt_SkipOver.text()
-        except:
-            pass
-        self.save_json()
-
-    def W_Bott(self):
-        """
-        Salva el registro del CTD al momento de disparar una Botella Niskin en el archivo de estructura JSON.
-        """
-        try:
-            self.estacion[self.txt_EstGral.text(
-            )]['Botellas'][self.CTD_str['Bot']] = self.CTD_str
-        except:
-            pass
-        self.save_json()
-
-    def W_CTD(self, pos, loc):
-        # pos se refiere al contador del disparador correspondiente. Si es de cub o fdo
-        # loc se refiere a si es cubierta o fondo
-        self.estacion[self.txt_EstGral.text()][loc][str(pos)] = self.CTD_str
-        self.save_json()
-
-    def W_TSGvsCTD(self):
-        CTD = self.CTD_str
-        TSG = self.TSG_str
-        self.estacion[self.txt_EstGral.text()]['Superficie'][str(self.countSup)] = {
-            'Hora': self.NMEA_Str['hora'],
-            'CTD': CTD,
-            'TSG': TSG,
-        }
-        self.countSup += 1
-        self.save_json()
+    # Funciones de gestion de datos movidas a StationManager
+    # - save_json
+    # - init_vars
+    # - W_Pos
+    # - W_SkipOver
+    # - W_Bott
+    # - W_CTD
+    # - W_TSGvsCTD
 
     def expira(self):
         if self.cfg['Configuracion']['NMEA']['Status'] != '2':
